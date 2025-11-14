@@ -26,24 +26,23 @@ jobs:
             arch: darwin-arm64
           - os: ubuntu-latest
             arch: linux-x64
-# temporary disabled: linux arm runners are not available for private repos
-#          - os: ubuntu-22.04-arm
-#            arch: linux-arm64
+          - os: ubuntu-22.04-arm
+            arch: linux-arm64
     steps:
       - uses: actions/checkout@v4
       - name: fetch sources
         run: |
-          git clone --depth 1 -b "$LIBSASS_VERSION" https://github.com/sass/libsass.git
-          git clone --depth 1 -b "$SASSC_VERSION" https://github.com/sass/sassc.git
+          git clone --depth 1 -b "$LIBSASS_VERSION" https://github.com/sass/libsass.git libsass-src
+          git clone --depth 1 -b "$SASSC_VERSION" https://github.com/sass/sassc.git sassc-src
       - name: build sassc
         run: |
           CPU=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
-          SASS_LIBSASS_PATH="$(pwd)/libsass" make -C sassc -j$CPU
-          cp sassc/bin/sassc ./sassc
+          SASS_LIBSASS_PATH="$(pwd)/libsass-src" make -C sassc-src -j$CPU
+          mv sassc-src/bin/sassc ./sassc
           chmod +x ./sassc
       - name: include combined sassc & libsass LICENSE file
         run: |
-          cat libsass/LICENSE sassc/LICENSE > LICENSE
+          cat libsass-src/LICENSE sassc-src/LICENSE > LICENSE
       - name: test sassc binary
         run: |
           ./sassc --version
