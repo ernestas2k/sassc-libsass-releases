@@ -22,7 +22,7 @@ jobs:
         include:
           - os: macos-13
             arch: darwin-x64
-          - os: macos-14
+          - os: macos-latest
             arch: darwin-arm64
           - os: ubuntu-latest
             arch: linux-x64
@@ -39,24 +39,25 @@ jobs:
         run: |
           CPU=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
           SASS_LIBSASS_PATH="$(pwd)/libsass" make -C sassc -j$CPU
-          mv sassc/bin/sassc sassc-${{ matrix.arch }}
-          chmod +x sassc-${{ matrix.arch }}
+          mv sassc/bin/sassc sassc
+          chmod +x sassc
+      - name: include combined sassc & libsass LICENSE file
+        run: |
+          cat libsass/LICENSE sassc/LICENSE > LICENSE
       - name: test sassc binary
         run: |
-          echo "running sassc --version..."
-          ./sassc-${{ matrix.arch }} --version
-          echo "testing basic SCSS compilation..."
+          ./sassc --version
           echo '$color: red; .x { color: $color; }' > test.scss
-          ./sassc-${{ matrix.arch }} test.scss test.css
-          echo "compiled CSS output:"
-          cat test.css
+          ./sassc test.scss test.css
           if ! grep -q "color: red" test.css; then
             echo "ERROR: output CSS does not contain expected result"
+            echo "contents of test.css:"
+            cat test.css
             exit 1
           fi
       - name: package archive
         run: |
-          tar -czf "sassc-${SASSC_VERSION}-libsass-${LIBSASS_VERSION}-${{ matrix.arch }}.tar.gz" sassc-${{ matrix.arch }}
+          tar -czf "sassc-${SASSC_VERSION}-libsass-${LIBSASS_VERSION}-${{ matrix.arch }}.tar.gz" sassc LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.arch }}
