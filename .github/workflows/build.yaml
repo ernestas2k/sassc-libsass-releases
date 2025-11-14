@@ -25,7 +25,7 @@ jobs:
             arch: darwin-arm64
           - os: ubuntu-latest
             arch: linux-x64
-          - os: ubuntu-22.04-arm64
+          - os: ubuntu-22.04-arm
             arch: linux-arm64
     steps:
       - uses: actions/checkout@v4
