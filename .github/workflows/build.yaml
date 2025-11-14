@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  LIBSASS_VERSION: "3.6.5"
+  LIBSASS_VERSION: "3.6.6"
   SASSC_VERSION: "3.6.2"
 
 jobs:
