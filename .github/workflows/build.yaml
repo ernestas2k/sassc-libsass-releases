@@ -2,6 +2,7 @@ name: Build & release legacy sassc binaries
 
 permissions:
   contents: write
+
 on:
   push:
     tags:
@@ -42,15 +43,15 @@ jobs:
           chmod +x sassc-${{ matrix.arch }}
       - name: test sassc binary
         run: |
-          echo "Running sassc --version..."
+          echo "running sassc --version..."
           ./sassc-${{ matrix.arch }} --version
-          echo "Testing basic SCSS compilation..."
+          echo "testing basic SCSS compilation..."
           echo '$color: red; .x { color: $color; }' > test.scss
           ./sassc-${{ matrix.arch }} test.scss test.css
-          echo "Compiled CSS output:"
+          echo "compiled CSS output:"
           cat test.css
           if ! grep -q "color: red" test.css; then
-            echo "ERROR: Output CSS does not contain expected result"
+            echo "ERROR: output CSS does not contain expected result"
             exit 1
           fi
       - name: package archive
@@ -62,13 +63,14 @@ jobs:
           path: "*.tar.gz"
 
   release:
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: builds
-      - name: Generate sha256 checksums
+      - name: generate sha256 checksums
         run: |
           cd builds
           find . -name "*.tar.gz" -exec sha256sum {} \; >> sha256s.txt
